@@ -1,0 +1,22 @@
+# Scraped data — large files, regenerate with scraper/scrape.py
+data/
+images/
+
+# Local docs — not for the repo
+docs/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env / secrets
+.env
+*.env.local
