@@ -1,0 +1,18 @@
+# Reconstructed from the live Worker config (2026-10-05). Source of truth: big PC.
+name = "sw-page"
+main = "worker/index.js"
+compatibility_date = "2025-09-01"
+account_id = "f1c6c423661bd057f684d4d995ebdaf4"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "sw-monsters"
+database_id = "48115c10-5fed-4f19-a4de-98a20ada40a0"
+
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "sw-images"

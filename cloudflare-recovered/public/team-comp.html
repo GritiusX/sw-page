@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Team Composition — SW Guide</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header>
+  <div class="logo">
+    <a href="/" style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:.6rem">
+      <span class="logo-sw">SW</span>
+      <span class="logo-text">Monster Guide</span>
+    </a>
+  </div>
+  <p class="tagline">All 3 000+ monsters — stats, skills &amp; awakenings</p>
+  <div class="filters">
+    <input id="search" type="text" placeholder="Search monster name…" autocomplete="off">
+    <select id="element">
+      <option value="">All elements</option>
+      <option value="Fire">🔥 Fire</option>
+      <option value="Water">💧 Water</option>
+      <option value="Wind">🌪 Wind</option>
+      <option value="Light">✨ Light</option>
+      <option value="Dark">🌑 Dark</option>
+    </select>
+    <select id="archetype">
+      <option value="">All archetypes</option>
+      <option value="Attack">Attack</option>
+      <option value="Defense">Defense</option>
+      <option value="HP">HP</option>
+      <option value="Support">Support</option>
+    </select>
+    <select id="stars">
+      <option value="">All stars</option>
+      <option value="5">5 ★</option>
+      <option value="4">4 ★</option>
+      <option value="3">3 ★</option>
+      <option value="2">2 ★</option>
+      <option value="1">1 ★</option>
+    </select>
+  </div>
+</header>
+
+<main id="tc-page" class="monster-page">
+  <div class="mp-skeleton">
+    <div class="skeleton" style="height:120px;border-radius:12px;margin-bottom:1rem"></div>
+    <div class="skeleton" style="height:300px;border-radius:12px"></div>
+  </div>
+</main>
+
+
+<footer>
+  <a href="/dashboard" class="footer-dashboard-btn">📊 Dashboard</a>
+</footer>
+
+<script src="/team-comp.js"></script>
+</body>
+</html>

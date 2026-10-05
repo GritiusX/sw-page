@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Summoners War — Monster Guide</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div class="header-left">
+      <div class="logo">
+        <span class="logo-sw">SW</span>
+        <span class="logo-text">Monster Guide</span>
+      </div>
+      <p class="tagline">All 3 000+ monsters — stats, skills &amp; awakenings</p>
+    </div>
+    <div class="header-right">
+      <div class="filters">
+        <input id="search" type="text" placeholder="Search monster name…" autocomplete="off">
+        <select id="element">
+          <option value="">All elements</option>
+          <option value="Fire">🔥 Fire</option>
+          <option value="Water">💧 Water</option>
+          <option value="Wind">🌪 Wind</option>
+          <option value="Light">✨ Light</option>
+          <option value="Dark">🌑 Dark</option>
+        </select>
+        <select id="archetype">
+          <option value="">All archetypes</option>
+          <option value="Attack">Attack</option>
+          <option value="Defense">Defense</option>
+          <option value="HP">HP</option>
+          <option value="Support">Support</option>
+        </select>
+        <select id="stars">
+          <option value="">All stars</option>
+          <option value="5">5 ★</option>
+          <option value="4">4 ★</option>
+          <option value="3">3 ★</option>
+          <option value="2">2 ★</option>
+          <option value="1">1 ★</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="dungeon-btns">
+    <a href="/dungeon/gb12" class="dungeon-btn dungeon-gb">Team Guides GB12</a>
+    <a href="/dungeon/db12" class="dungeon-btn dungeon-db">Team Guides DB12</a>
+    <a href="/dungeon/nb12" class="dungeon-btn dungeon-nb">Team Guides NB12</a>
+    <a href="/dungeon/sf12" class="dungeon-btn dungeon-sf">Team Guides SF12</a>
+    <a href="/dungeon/pc12" class="dungeon-btn dungeon-pc">Team Guides PC12</a>
+    <a href="/dungeon/sr12" class="dungeon-btn dungeon-sr">Team Guides SR12</a>
+  </div>
+</header>
+
+<main>
+  <div class="results-bar">
+    <span id="count">Loading…</span>
+  </div>
+
+  <div id="grid" class="grid"></div>
+
+  <div id="pagination" class="pagination"></div>
+</main>
+
+<script src="/app.js"></script>
+<footer>
+  <a href="/dashboard" class="footer-dashboard-btn">📊 Dashboard</a>
+</footer>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monster — SW Guide</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header>
+  <div class="logo">
+    <a href="/" style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:.6rem">
+      <span class="logo-sw">SW</span>
+      <span class="logo-text">Monster Guide</span>
+    </a>
+  </div>
+  <p class="tagline">All 3 000+ monsters — stats, skills &amp; awakenings</p>
+  <div class="filters">
+    <input id="search" type="text" placeholder="Search monster name…" autocomplete="off">
+    <select id="element">
+      <option value="">All elements</option>
+      <option value="Fire">🔥 Fire</option>
+      <option value="Water">💧 Water</option>
+      <option value="Wind">🌪 Wind</option>
+      <option value="Light">✨ Light</option>
+      <option value="Dark">🌑 Dark</option>
+    </select>
+    <select id="archetype">
+      <option value="">All archetypes</option>
+      <option value="Attack">Attack</option>
+      <option value="Defense">Defense</option>
+      <option value="HP">HP</option>
+      <option value="Support">Support</option>
+    </select>
+    <select id="stars">
+      <option value="">All stars</option>
+      <option value="5">5 ★</option>
+      <option value="4">4 ★</option>
+      <option value="3">3 ★</option>
+      <option value="2">2 ★</option>
+      <option value="1">1 ★</option>
+    </select>
+  </div>
+</header>
+
+<main id="monster-page" class="monster-page">
+  <div class="mp-skeleton">
+    <div class="skeleton" style="height:180px;border-radius:12px;margin-bottom:1rem"></div>
+    <div class="skeleton" style="height:80px;border-radius:12px;margin-bottom:1rem"></div>
+    <div class="skeleton" style="height:240px;border-radius:12px"></div>
+  </div>
+</main>
+
+<!-- Add Rune Build modal -->
+<div id="mnAddRuneOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:200;align-items:center;justify-content:center" onclick="if(event.target===this)mnCloseAddRune()">
+  <div style="background:#1a1d27;border:1px solid #2e3250;border-radius:14px;padding:1.8rem;width:100%;max-width:480px;position:relative;max-height:92vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.7rem">
+      <h3 id="mnAddRuneTitle" style="font-size:1rem;color:#e8eaf6">Add Rune Build</h3>
+      <button onclick="mnCloseAddRune()" style="background:none;border:none;color:#8b90b0;font-size:1.2rem;cursor:pointer;line-height:1">✕</button>
+    </div>
+    <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:#8b90b0;margin-bottom:.7rem">Click each slot to fill in stats</div>
+    <div style="display:flex;justify-content:center">
+      <div id="mnArStarContainer" style="position:relative;width:260px;height:260px"></div>
+    </div>
+    <div id="mnArSlotsSummary" style="display:flex;gap:.25rem;flex-wrap:wrap;margin-top:.7rem;min-height:24px"></div>
+    <div id="mnAddRuneCaptcha" class="cf-turnstile" data-sitekey="0x4AAAAAAFCeTQKQViJOybqD" data-theme="dark" style="margin-top:.9rem;margin-bottom:.3rem"></div>
+    <div id="mnAddRuneMsg" style="font-size:.82rem;margin-bottom:.5rem"></div>
+    <div style="display:flex;gap:.6rem;justify-content:flex-end">
+      <button onclick="mnCloseAddRune()" style="background:#22263a;border:1px solid #2e3250;color:#c8cadf;border-radius:8px;padding:.5rem 1rem;cursor:pointer;font-size:.88rem">Cancel</button>
+      <button id="mnAddRuneSubmitBtn" onclick="mnSubmitAddRune()" style="background:linear-gradient(135deg,#5a4ee8,#8b5cf6);border:none;color:#fff;border-radius:8px;padding:.5rem 1.1rem;cursor:pointer;font-size:.88rem;font-weight:700">Submit Build</button>
+    </div>
+  </div>
+</div>
+
+<!-- Floating slot form for rune builder -->
+<div id="mnArSlotForm" style="display:none;position:fixed;background:#1a1d27;border:1px solid #7c6cf8;border-radius:10px;padding:1rem;width:290px;z-index:600;box-shadow:0 8px 32px rgba(0,0,0,.85)">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
+    <span id="mnArFormTitle" style="font-weight:700;font-size:.95rem;color:#e8eaf6"></span>
+    <button onclick="mnArCloseSlotForm()" style="background:none;border:none;color:#8b90b0;cursor:pointer;font-size:1.1rem;line-height:1;padding:0">✕</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.25rem">
+    <span style="font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:#8b90b0">Rune Set</span>
+    <img id="mnArRuneSetIcon" src="" width="20" height="20" style="display:none;object-fit:contain">
+  </div>
+  <select id="mnArRuneSet" onchange="mnArUpdateSetIcon(this.value)" style="width:100%;background:#0f1117;border:1px solid #2e3250;border-radius:7px;padding:.45rem .6rem;color:#e8eaf6;font-size:.88rem;margin-bottom:.6rem">
+    <option value="">— none —</option>
+    <option>Energy</option><option>Fatal</option><option>Blade</option>
+    <option>Swift</option><option>Focus</option><option>Guard</option>
+    <option>Endure</option><option>Shield</option><option>Revenge</option>
+    <option>Will</option><option>Nemesis</option><option>Vampire</option>
+    <option>Destroy</option><option>Despair</option><option>Violent</option>
+    <option>Rage</option><option>Fight</option><option>Determination</option>
+    <option>Enhance</option><option>Accuracy</option><option>Tolerance</option>
+  </select>
+  <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:#8b90b0;margin-bottom:.25rem">Main Stat</div>
+  <div id="mnArMainSection" style="margin-bottom:.6rem"></div>
+  <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:#8b90b0;margin-bottom:.3rem">Substats <span style="color:#555;font-size:.7rem;text-transform:none">(optional)</span></div>
+  <div id="mnArSubSection" style="margin-bottom:.7rem"></div>
+  <button onclick="mnArSaveSlot()" style="width:100%;background:linear-gradient(135deg,#5a4ee8,#8b5cf6);color:#fff;border:none;border-radius:7px;padding:.5rem;font-size:.88rem;font-weight:700;cursor:pointer">✓ Done</button>
+</div>
+
+<!-- Add Team Composition modal -->
+<div id="mnAddTcOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:200;align-items:center;justify-content:center" onclick="if(event.target===this)mnCloseAddTc()">
+  <div style="background:#1a1d27;border:1px solid #2e3250;border-radius:14px;padding:1.8rem;width:100%;max-width:480px;position:relative">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem">
+      <h3 id="mnAddTcTitle" style="font-size:1rem;color:#e8eaf6">Add Team Composition</h3>
+      <button onclick="mnCloseAddTc()" style="background:none;border:none;color:#8b90b0;font-size:1.2rem;cursor:pointer;line-height:1">✕</button>
+    </div>
+    <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:#8b90b0;margin-bottom:.4rem">Team members</div>
+    <div id="mnTcMembersBox" style="display:flex;flex-wrap:wrap;gap:.35rem;min-height:46px;background:#0f1117;border:1px solid #2e3250;border-radius:8px;padding:.5rem;align-items:center;margin-bottom:.3rem"></div>
+    <div id="mnTcMemberCount" style="color:#8b90b0;font-size:.76rem;margin-bottom:.7rem">0 / 5 members</div>
+    <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:#8b90b0;margin-bottom:.3rem">Add monster to team</div>
+    <input type="text" id="mnTcSearch" placeholder="Search monster name…" autocomplete="off" oninput="mnTcSearch(this.value)" style="width:100%;background:#0f1117;border:1px solid #2e3250;border-radius:8px;padding:.55rem .75rem;color:#e8eaf6;font-size:.88rem;box-sizing:border-box">
+    <div id="mnTcSearchResults" style="display:none;background:#0f1117;border:1px solid #2e3250;border-radius:8px;margin-top:.25rem;max-height:180px;overflow-y:auto"></div>
+    <div id="mnAddTcCaptcha" class="cf-turnstile" data-sitekey="0x4AAAAAAFCeTQKQViJOybqD" data-theme="dark" style="margin-top:.9rem;margin-bottom:.3rem"></div>
+    <div id="mnAddTcMsg" style="font-size:.82rem;margin-bottom:.5rem"></div>
+    <div style="display:flex;gap:.6rem;justify-content:flex-end">
+      <button onclick="mnCloseAddTc()" style="background:#22263a;border:1px solid #2e3250;color:#c8cadf;border-radius:8px;padding:.5rem 1rem;cursor:pointer;font-size:.88rem">Cancel</button>
+      <button id="mnAddTcSubmitBtn" onclick="mnSubmitAddTc()" style="background:linear-gradient(135deg,#2a5a3a,#3a8a5a);border:none;color:#fff;border-radius:8px;padding:.5rem 1.1rem;cursor:pointer;font-size:.88rem;font-weight:700">Submit Team</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script src="/monster.js"></script>
+<footer>
+  <a href="/dashboard" class="footer-dashboard-btn">📊 Dashboard</a>
+</footer>
+</body>
+</html>
