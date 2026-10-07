@@ -63,8 +63,24 @@ document.addEventListener("DOMContentLoaded", () => {
   load();
 });
 
+// ── Latest featured compositions (hidden while filtering monsters) ──────────────
+let homeTeamsLoaded = false;
+async function updateHomeTeams() {
+  const section = document.getElementById("home-teams");
+  const filtering = state.q || state.element || state.archetype || state.stars || state.page > 1;
+  if (filtering) { section.style.display = "none"; return; }
+  if (!homeTeamsLoaded) {
+    homeTeamsLoaded = true;
+    const data = await fetch("/api/teams?limit=6").then(r => r.json()).catch(() => ({ results: [] }));
+    document.getElementById("home-teams-grid").innerHTML = data.results.map(teamCardHTML).join("")
+      || `<div style="color:var(--text-dim);font-size:.88rem;padding:.6rem 0">No compositions yet — add one from any monster page.</div>`;
+  }
+  section.style.display = "";
+}
+
 // ── Load monsters ─────────────────────────────────────────────────────────────
 async function load() {
+  updateHomeTeams();
   showSkeletons();
   const params = new URLSearchParams({
     q: state.q, element: state.element, archetype: state.archetype,

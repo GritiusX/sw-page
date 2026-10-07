@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>All Team Compositions — SW Guide</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header>
+  <div class="logo">
+    <a href="/" style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:.6rem">
+      <span class="logo-sw">SW</span>
+      <span class="logo-text">Monster Guide</span>
+    </a>
+  </div>
+  <p class="tagline">All 3 000+ monsters — stats, skills &amp; awakenings</p>
+</header>
+
+<main class="teams-page">
+  <div class="section-title" style="margin-top:0">All Team Compositions</div>
+  <div class="teams-filter">
+    <div id="teams-chips" class="teams-chips"></div>
+    <div style="position:relative">
+      <input id="teams-search" type="text" placeholder="Add a monster to filter teams…" autocomplete="off">
+      <div id="teams-search-results" class="teams-search-results" style="display:none"></div>
+    </div>
+    <div id="teams-filter-count" class="teams-filter-count"></div>
+  </div>
+  <div id="teams-modes" class="teams-toolbar">
+    <button type="button" class="tc-mode-tab active" data-mode="">All</button>
+    <button type="button" class="tc-mode-tab" data-mode="rta">RTA</button>
+    <button type="button" class="tc-mode-tab" data-mode="defense">Defense Arena</button>
+    <button type="button" class="tc-mode-tab" data-mode="attack">Attack Arena</button>
+  </div>
+  <div id="teams-count" class="results-bar" style="padding:0 0 .6rem"></div>
+  <div id="teams-list" class="teams-list"></div>
+  <button id="teams-more" type="button" class="view-all-btn" style="display:none;cursor:pointer">Load more</button>
+</main>
+
+<footer>
+  <a href="/dashboard" class="footer-dashboard-btn">📊 Dashboard</a>
+</footer>
+
+<script src="/team-card.js"></script>
+<script src="/teams.js"></script>
+</body>
+</html>

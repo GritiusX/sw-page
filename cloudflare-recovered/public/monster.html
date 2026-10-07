@@ -101,33 +101,7 @@
   <button onclick="mnArSaveSlot()" style="width:100%;background:linear-gradient(135deg,#5a4ee8,#8b5cf6);color:#fff;border:none;border-radius:7px;padding:.5rem;font-size:.88rem;font-weight:700;cursor:pointer">✓ Done</button>
 </div>
 
-<!-- Add Team Composition modal -->
-<div id="mnAddTcOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:200;align-items:center;justify-content:center" onclick="if(event.target===this)mnCloseAddTc()">
-  <div style="background:#1a1d27;border:1px solid #2e3250;border-radius:14px;padding:1.8rem;width:100%;max-width:480px;position:relative">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem">
-      <h3 id="mnAddTcTitle" style="font-size:1rem;color:#e8eaf6">Add Team Composition</h3>
-      <button onclick="mnCloseAddTc()" style="background:none;border:none;color:#8b90b0;font-size:1.2rem;cursor:pointer;line-height:1">✕</button>
-    </div>
-    <div id="mnTcModeTabs" style="display:flex;gap:.35rem;margin-bottom:.9rem">
-      <button type="button" data-mode="rta" onclick="mnTcSetMode('rta')" class="tc-mode-tab">RTA</button>
-      <button type="button" data-mode="defense" onclick="mnTcSetMode('defense')" class="tc-mode-tab">Defense Arena</button>
-      <button type="button" data-mode="attack" onclick="mnTcSetMode('attack')" class="tc-mode-tab">Attack Arena</button>
-    </div>
-    <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:#8b90b0;margin-bottom:.4rem">Team members</div>
-    <div id="mnTcMembersBox" style="display:flex;flex-wrap:wrap;gap:.35rem;min-height:46px;background:#0f1117;border:1px solid #2e3250;border-radius:8px;padding:.5rem;align-items:center;margin-bottom:.3rem"></div>
-    <div id="mnTcMemberCount" style="color:#8b90b0;font-size:.76rem;margin-bottom:.7rem">0 / 5 members</div>
-    <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:#8b90b0;margin-bottom:.3rem">Add monster to team</div>
-    <input type="text" id="mnTcSearch" placeholder="Search monster name…" autocomplete="off" oninput="mnTcSearch(this.value)" style="width:100%;background:#0f1117;border:1px solid #2e3250;border-radius:8px;padding:.55rem .75rem;color:#e8eaf6;font-size:.88rem;box-sizing:border-box">
-    <div id="mnTcSearchResults" style="display:none;background:#0f1117;border:1px solid #2e3250;border-radius:8px;margin-top:.25rem;max-height:180px;overflow-y:auto"></div>
-    <div id="mnAddTcCaptcha" class="cf-turnstile" data-sitekey="0x4AAAAAAFCeTQKQViJOybqD" data-theme="dark" style="margin-top:.9rem;margin-bottom:.3rem"></div>
-    <div id="mnAddTcMsg" style="font-size:.82rem;margin-bottom:.5rem"></div>
-    <div style="display:flex;gap:.6rem;justify-content:flex-end">
-      <button onclick="mnCloseAddTc()" style="background:#22263a;border:1px solid #2e3250;color:#c8cadf;border-radius:8px;padding:.5rem 1rem;cursor:pointer;font-size:.88rem">Cancel</button>
-      <button id="mnAddTcSubmitBtn" onclick="mnSubmitAddTc()" style="background:linear-gradient(135deg,#2a5a3a,#3a8a5a);border:none;color:#fff;border-radius:8px;padding:.5rem 1.1rem;cursor:pointer;font-size:.88rem;font-weight:700">Submit Team</button>
-    </div>
-  </div>
-</div>
-
+<script src="/team-add.js"></script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script src="/monster.js"></script>
 <footer>

@@ -682,3 +682,58 @@ footer { text-align: center; padding: 2rem 1rem; border-top: 1px solid var(--bor
 .tc-mode-tab:hover { color: #c8cadf; }
 .tc-mode-tab.active { background: linear-gradient(135deg,#1a3a2a,#2a5a3a); border-color: #3a8a5a; color: #e8eaf6; }
 .tc-mode-tab .tc-mode-count { opacity: .7; font-weight: 500; margin-left: .25rem; }
+
+/* ── Team composition cards (home "Latest Featured Compositions" + /teams) ── */
+.home-teams { max-width: 1400px; margin: 0 auto 1.2rem; padding: 0 1.2rem; }
+.home-teams-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: .8rem; }
+.team-card {
+  background: var(--surface2); border: 1px solid var(--border); border-radius: 12px;
+  padding: .8rem 1rem; display: flex; flex-direction: column; gap: .7rem; min-width: 0;
+}
+.team-card-head { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; font-size: .85rem; }
+.team-card-anchor { color: var(--text); font-weight: 700; text-decoration: none; }
+.team-card-anchor:hover { color: var(--accent); }
+.team-card-date { margin-left: auto; color: var(--text-dim); font-size: .75rem; }
+.team-card-members { display: flex; gap: .5rem; flex-wrap: wrap; }
+.team-card-members .tc-member { min-width: 56px; max-width: 64px; }
+.team-card-members .tc-member img { width: 52px; height: 52px; }
+.team-card-members .tc-member-name { font-size: .7rem; }
+.team-mode-badge { border-radius: 5px; padding: .12rem .5rem; font-size: .7rem; font-weight: 700; border: 1px solid; }
+.team-mode-rta     { background: #1e1a36; border-color: #5a4ee8; color: #a090f8; }
+.team-mode-defense { background: #1a2636; border-color: #3a6aa8; color: #90b8f0; }
+.team-mode-attack  { background: #361a1a; border-color: #a83a3a; color: #f09090; }
+.view-all-btn {
+  display: block; width: fit-content; margin: .9rem auto 0; text-decoration: none;
+  background: linear-gradient(135deg,#1a3a2a,#2a5a3a); border: 1px solid #3a8a5a; color: #80d8a0;
+  border-radius: 8px; padding: .6rem 1.4rem; font-size: .88rem; font-weight: 600;
+}
+.view-all-btn:hover { opacity: .85; }
+.teams-page { max-width: 900px; margin: 0 auto; padding: 1.2rem; }
+.teams-toolbar { display: flex; gap: .6rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.teams-filter { margin-bottom: .8rem; }
+.teams-chips { display: flex; flex-wrap: wrap; gap: .35rem; margin-bottom: .45rem; }
+.teams-chip {
+  display: inline-flex; align-items: center; gap: .3rem; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 6px; padding: .22rem .45rem; font-size: .8rem; color: var(--text);
+}
+.teams-chip img { width: 22px; height: 22px; object-fit: contain; border-radius: 3px; background: #111; }
+.teams-chip button { background: none; border: none; color: #e08080; cursor: pointer; font-size: .85rem; line-height: 1; padding: 0 .1rem; }
+.teams-filter-count { color: var(--text-dim); font-size: .76rem; margin-top: .3rem; }
+.teams-search-results {
+  position: absolute; left: 0; right: 0; top: calc(100% + .25rem); z-index: 50; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 8px; max-height: 260px; overflow-y: auto;
+}
+.teams-search-item { display: flex; align-items: center; gap: .5rem; padding: .5rem .7rem; cursor: pointer; border-bottom: 1px solid var(--surface2); font-size: .88rem; }
+.teams-search-item:hover { background: var(--surface2); }
+.teams-search-item img { width: 28px; height: 28px; object-fit: contain; border-radius: 3px; background: #111; }
+.teams-filter input, .teams-toolbar input {
+  width: 100%; box-sizing: border-box; flex: 1; min-width: 220px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  padding: .55rem .8rem; color: var(--text); font-size: .9rem; outline: none;
+}
+.teams-filter input:focus, .teams-toolbar input:focus { border-color: var(--accent); }
+.teams-toolbar .tc-mode-tab { flex: 0 1 auto; }
+.teams-list { display: flex; flex-direction: column; gap: .8rem; }
+@media (max-width: 500px) {
+  .home-teams-grid { grid-template-columns: 1fr; }
+  .teams-toolbar .tc-mode-tab { flex: 1 1 40%; }
+}

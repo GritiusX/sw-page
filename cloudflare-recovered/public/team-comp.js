@@ -50,6 +50,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const m  = await mRes.json();
   const tc = tcRes.ok ? await tcRes.json() : { results: [] };
+  window._pageMonster = m;
 
   document.title = `${m.name} — Team Composition — SW Guide`;
   document.getElementById("tc-page").innerHTML = renderPage(m, tc.results || []);
@@ -57,7 +58,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   setTcMode(initial);
 });
 
+// Called by team-add.js after a successful submit: re-render and show that mode's tab.
+window.onTeamAdded = async (mode) => {
+  const tc = await fetch(`/api/team-comp/${monsterId}`, { cache: "no-store" }).then(r => r.json()).catch(() => null);
+  if (!tc) return;
+  document.getElementById("tc-page").innerHTML = renderPage(window._pageMonster, tc.results || []);
+  setTcMode(mode);
+};
+
+let currentTcMode = "rta";
 function setTcMode(mode) {
+  currentTcMode = mode;
   document.querySelectorAll("#tcModeTabs .tc-mode-tab").forEach(b => b.classList.toggle("active", b.dataset.mode === mode));
   document.querySelectorAll(".tc-mode-panel").forEach(p => p.style.display = p.dataset.mode === mode ? "" : "none");
   history.replaceState(null, "", "#" + mode);
@@ -111,8 +122,11 @@ function renderPage(m, teams) {
     const list = teams.filter(t => (t.mode || "rta") === mode.key);
     return `<div class="tc-mode-panel" data-mode="${mode.key}">${teamsListHTML(list, mode.label)}</div>`;
   };
-  const tabsHTML = `<div id="tcModeTabs" style="display:flex;gap:.4rem;margin-bottom:1rem;max-width:560px">
-    ${TC_MODES.map(x => `<button type="button" class="tc-mode-tab" data-mode="${x.key}" onclick="setTcMode('${x.key}')">${x.label}<span class="tc-mode-count">(${teams.filter(t => (t.mode || "rta") === x.key).length})</span></button>`).join("")}
+  const tabsHTML = `<div style="display:flex;gap:.4rem;margin-bottom:1rem;flex-wrap:wrap;align-items:stretch">
+    <div id="tcModeTabs" style="display:flex;gap:.4rem;flex:1;min-width:260px;max-width:560px">
+      ${TC_MODES.map(x => `<button type="button" class="tc-mode-tab" data-mode="${x.key}" onclick="setTcMode('${x.key}')">${x.label}<span class="tc-mode-count">(${teams.filter(t => (t.mode || "rta") === x.key).length})</span></button>`).join("")}
+    </div>
+    <button type="button" onclick="mnOpenAddTc(currentTcMode)" style="background:linear-gradient(135deg,#1a3a2a,#2a5a3a);border:1px solid #3a8a5a;color:#80d8a0;border-radius:8px;padding:.5rem 1rem;font-size:.85rem;font-weight:600;cursor:pointer;white-space:nowrap">➕ Add Team</button>
   </div>`;
 
   return `

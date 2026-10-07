@@ -1657,6 +1657,9 @@ async function handleAPI(url, request, env) {
   if (rbMatch && request.method === "GET") {
     return getRuneBuilds(rbMatch[1], env);
   }
+  if (path === "/teams" && request.method === "GET") {
+    return listTeams(url.searchParams, env);
+  }
   const tcMatch = path.match(/^\/team-comp\/(\d+)$/);
   if (tcMatch && request.method === "GET") {
     return getTeamComp(tcMatch[1], env);
@@ -1722,6 +1725,38 @@ async function getTeamComp(monsterId, env) {
   }
 }
 __name(getTeamComp, "getTeamComp");
+async function listTeams(params, env) {
+  const mode = TEAM_MODE_MAX[params.get("mode")] ? params.get("mode") : "";
+  const maxIds = mode ? TEAM_MODE_MAX[mode] : 5;
+  const ids = [...new Set((params.get("monsters") || "").split(",").map((x) => parseInt(x)).filter((x) => x > 0))].slice(0, maxIds);
+  const limit = Math.min(Math.max(parseInt(params.get("limit")) || 20, 1), 50);
+  const offset = Math.max(parseInt(params.get("offset")) || 0, 0);
+  const conds = ids.map(() => "EXISTS (SELECT 1 FROM json_each(t.members) j WHERE CAST(json_extract(j.value, '$.id') AS INTEGER) = ?)");
+  if (mode) conds.push("t.mode = ?");
+  const where = conds.length ? "WHERE " + conds.join(" AND ") : "";
+  const binds = mode ? [...ids, mode] : ids;
+  try {
+    const [rows, total] = await env.DB.batch([
+      env.DB.prepare(`SELECT t.id, t.anchor_monster_id, t.anchor_name, t.members, t.mode, t.created_at
+        FROM teams t ${where} ORDER BY t.created_at DESC, t.id DESC LIMIT ? OFFSET ?`).bind(...binds, limit, offset),
+      env.DB.prepare(`SELECT COUNT(*) AS n FROM teams t ${where}`).bind(...binds)
+    ]);
+    return json({
+      total: total.results[0]?.n ?? 0,
+      results: rows.results.map((r) => {
+        let members = [];
+        try {
+          members = JSON.parse(r.members);
+        } catch {
+        }
+        return { id: r.id, anchor_monster_id: r.anchor_monster_id, anchor_name: r.anchor_name, mode: r.mode || "rta", members, created_at: r.created_at };
+      })
+    });
+  } catch {
+    return json({ total: 0, results: [] });
+  }
+}
+__name(listTeams, "listTeams");
 async function handleAdminAPI(path, request, env) {
   if (!checkAdmin(request, env)) {
     return new Response("Unauthorized", { status: 401 });
