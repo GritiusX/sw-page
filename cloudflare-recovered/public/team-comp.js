@@ -4,6 +4,11 @@ const ELEMENT_CLASS = {
 };
 const IMG = (f) => f ? `/images/monsters/${f}` : "/placeholder.png";
 const STARS = (n) => "★".repeat(n);
+const TC_MODES = [
+  { key: "rta",     label: "RTA" },
+  { key: "defense", label: "Defense Arena" },
+  { key: "attack",  label: "Attack Arena" },
+];
 
 function initSearchNav() {
   const params = new URLSearchParams(location.hash.slice(1));
@@ -48,8 +53,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   document.title = `${m.name} — Team Composition — SW Guide`;
   document.getElementById("tc-page").innerHTML = renderPage(m, tc.results || []);
-  // no lightbox needed for team comp
+  const initial = TC_MODES.some(x => x.key === location.hash.slice(1)) ? location.hash.slice(1) : "rta";
+  setTcMode(initial);
 });
+
+function setTcMode(mode) {
+  document.querySelectorAll("#tcModeTabs .tc-mode-tab").forEach(b => b.classList.toggle("active", b.dataset.mode === mode));
+  document.querySelectorAll(".tc-mode-panel").forEach(p => p.style.display = p.dataset.mode === mode ? "" : "none");
+  history.replaceState(null, "", "#" + mode);
+}
 
 function showError(msg) {
   document.getElementById("tc-page").innerHTML =
@@ -95,7 +107,24 @@ function renderPage(m, teams) {
       </div>
     </div>`;
 
-  const teamsHTML = teams.length
+  const panelHTML = (mode) => {
+    const list = teams.filter(t => (t.mode || "rta") === mode.key);
+    return `<div class="tc-mode-panel" data-mode="${mode.key}">${teamsListHTML(list, mode.label)}</div>`;
+  };
+  const tabsHTML = `<div id="tcModeTabs" style="display:flex;gap:.4rem;margin-bottom:1rem;max-width:560px">
+    ${TC_MODES.map(x => `<button type="button" class="tc-mode-tab" data-mode="${x.key}" onclick="setTcMode('${x.key}')">${x.label}<span class="tc-mode-count">(${teams.filter(t => (t.mode || "rta") === x.key).length})</span></button>`).join("")}
+  </div>`;
+
+  return `
+    <div class="section-title" style="margin-top:0">Team Composition — ${m.name}</div>
+    ${familyStripHTML(m)}
+    ${heroHTML}
+    ${tabsHTML}
+    ${TC_MODES.map(panelHTML).join("")}`;
+}
+
+function teamsListHTML(teams, label) {
+  return teams.length
     ? `<div class="tc-teams-list">
         ${teams.map(t => `
           <div class="tc-team-row">
@@ -108,12 +137,6 @@ function renderPage(m, teams) {
        </div>`
     : `<div class="empty" style="margin-top:2rem">
         <div class="big">👥</div>
-        No team compositions added yet for this monster.
+        No ${label} teams added yet for this monster.
        </div>`;
-
-  return `
-    <div class="section-title" style="margin-top:0">Team Composition — ${m.name}</div>
-    ${familyStripHTML(m)}
-    ${heroHTML}
-    ${teamsHTML}`;
 }

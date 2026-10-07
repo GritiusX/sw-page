@@ -303,6 +303,7 @@ function mnOpenAddRune() {
   const m=window._pageMonster; if(!m) return;
   _mnArSlots=[{},{},{},{},{},{}]; _mnArCurrentSlot=-1;
   document.getElementById('mnAddRuneTitle').textContent=`Add Rune Build — ${m.name}`;
+  document.getElementById('mnArName').value='';
   document.getElementById('mnAddRuneMsg').textContent='';
   document.getElementById('mnAddRuneSubmitBtn').disabled=false;
   document.getElementById('mnAddRuneSubmitBtn').textContent='Submit Build';
@@ -325,7 +326,7 @@ async function mnSubmitAddRune() {
   if(!filledAny){msg.style.color='#e08080';msg.textContent='Fill at least one slot before submitting.';return;}
   const sc={};_mnArSlots.forEach(s=>{if(s&&s.rune_set)sc[s.rune_set]=(sc[s.rune_set]||0)+1;});
   const sorted=Object.entries(sc).sort((a,b)=>b[1]-a[1]);
-  let name=sorted.filter(e=>e[1]>=2).map(e=>e[0]).join(' / ')||( sorted.length?'Broken Set':'Unnamed Build');
+  let name=document.getElementById('mnArName').value.trim()||sorted.filter(e=>e[1]>=2).map(e=>e[0]).join(' / ')||( sorted.length?'Broken Set':'Unnamed Build');
   btn.disabled=true; btn.textContent='Submitting…';
   const res=await fetch('/api/submit-rune-build',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({monster_id:m.id,monster_name:m.name,name,slots:_mnArSlots,token})});
   if(res.ok){msg.style.color='#80c880';msg.textContent='Build submitted! Thank you 🙏';btn.textContent='Submitted!';setTimeout(mnCloseAddRune,2200);}
@@ -337,6 +338,16 @@ async function mnSubmitAddRune() {
    ══════════════════════════════════════════════════════════════ */
 let _mnTcMembers = [];
 let _mnTcTimer   = null;
+let _mnTcMode    = 'rta';
+const TC_MODE_MAX = { rta: 5, defense: 3, attack: 3 };
+
+function mnTcSetMode(mode) {
+  _mnTcMode = mode;
+  document.querySelectorAll('#mnTcModeTabs .tc-mode-tab').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
+  const max=TC_MODE_MAX[mode];
+  if(_mnTcMembers.length>max) _mnTcMembers=_mnTcMembers.slice(0,max);
+  _mnRenderTcMembers();
+}
 
 function mnOpenAddTc() {
   const m=window._pageMonster; if(!m) return;
@@ -348,7 +359,7 @@ function mnOpenAddTc() {
   document.getElementById('mnAddTcSubmitBtn').disabled=false;
   document.getElementById('mnAddTcSubmitBtn').textContent='Submit Team';
   if(window.turnstile) window.turnstile.reset();
-  _mnRenderTcMembers();
+  mnTcSetMode('rta');
   document.getElementById('mnAddTcOverlay').style.display='flex';
   setTimeout(()=>document.getElementById('mnTcSearch').focus(),50);
 }
@@ -365,13 +376,13 @@ function _mnRenderTcMembers() {
       <span>${tm.name}</span>
       ${i===0?'<span style="color:#7c6cf8;font-size:.68rem;margin-left:.1rem">(anchor)</span>':`<button onclick="_mnRemoveTcMember(${i})" style="background:none;border:none;color:#e08080;cursor:pointer;padding:0 .1rem;font-size:.85rem;line-height:1;margin-left:.1rem">✕</button>`}
     </div>`).join('')||'<span style="color:#8b90b0;font-size:.83rem">No members</span>';
-  document.getElementById('mnTcMemberCount').textContent=`${_mnTcMembers.length} / 5 members`;
+  document.getElementById('mnTcMemberCount').textContent=`${_mnTcMembers.length} / ${TC_MODE_MAX[_mnTcMode]} members`;
 }
 function _mnRemoveTcMember(i) { _mnTcMembers.splice(i,1); _mnRenderTcMembers(); }
 function mnTcSearch(q) {
   clearTimeout(_mnTcTimer);
   const res=document.getElementById('mnTcSearchResults');
-  if(!q.trim()||_mnTcMembers.length>=5){res.style.display='none';return;}
+  if(!q.trim()||_mnTcMembers.length>=TC_MODE_MAX[_mnTcMode]){res.style.display='none';return;}
   _mnTcTimer=setTimeout(async()=>{
     const data=await fetch('/api/monsters?q='+encodeURIComponent(q)+'&limit=8').then(r=>r.json());
     res.innerHTML=data.results.map(r=>`<div onclick="_mnAddTcMember(${r.id},'${r.name.replace(/'/g,"\\'")}','${r.image_filename||''}','${r.element||''}')" style="display:flex;align-items:center;gap:.5rem;padding:.5rem .7rem;cursor:pointer;border-bottom:1px solid #1a1d27" onmouseover="this.style.background='#1a1d27'" onmouseout="this.style.background=''">
@@ -383,7 +394,7 @@ function mnTcSearch(q) {
   },250);
 }
 function _mnAddTcMember(id,name,img,element) {
-  if(_mnTcMembers.length>=5||_mnTcMembers.some(t=>t.id===id)) return;
+  if(_mnTcMembers.length>=TC_MODE_MAX[_mnTcMode]||_mnTcMembers.some(t=>t.id===id)) return;
   _mnTcMembers.push({id,name,image_filename:img,element});
   document.getElementById('mnTcSearch').value='';
   document.getElementById('mnTcSearchResults').style.display='none';
@@ -397,7 +408,7 @@ async function mnSubmitAddTc() {
   if(!token){msg.style.color='#e08080';msg.textContent='Please complete the CAPTCHA first.';return;}
   if(_mnTcMembers.length<2){msg.style.color='#e08080';msg.textContent='Add at least one more member.';return;}
   btn.disabled=true; btn.textContent='Submitting…';
-  const res=await fetch('/api/submit-team-comp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({anchor_monster_id:m.id,anchor_name:m.name,members:_mnTcMembers,token})});
+  const res=await fetch('/api/submit-team-comp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({anchor_monster_id:m.id,anchor_name:m.name,members:_mnTcMembers,mode:_mnTcMode,token})});
   if(res.ok){msg.style.color='#80c880';msg.textContent='Team submitted! Thank you 🙏';btn.textContent='Submitted!';setTimeout(mnCloseAddTc,2200);}
   else{btn.disabled=false;btn.textContent='Submit Team';const e=await res.json().catch(()=>({}));msg.style.color='#e08080';msg.textContent=e.error||'Failed — please try again.';if(window.turnstile)window.turnstile.reset();}
 }

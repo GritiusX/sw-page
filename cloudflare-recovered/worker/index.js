@@ -182,6 +182,7 @@ async function handleDashboard(request, env) {
     anchor_monster_id INTEGER NOT NULL,
     anchor_name TEXT NOT NULL,
     members TEXT NOT NULL,
+    mode TEXT NOT NULL DEFAULT 'rta',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`).run();
   await env.DB.prepare(`CREATE TABLE IF NOT EXISTS rune_requests (
@@ -225,7 +226,7 @@ async function handleDashboard(request, env) {
       ORDER BY re.created_at DESC
     `),
     env.DB.prepare(`
-      SELECT t.id, t.anchor_monster_id, t.anchor_name, t.members, t.created_at,
+      SELECT t.id, t.anchor_monster_id, t.anchor_name, t.members, t.mode, t.created_at,
              m.image_filename as monster_img
       FROM teams t
       LEFT JOIN monsters m ON m.id = t.anchor_monster_id
@@ -287,7 +288,7 @@ async function handleDashboard(request, env) {
       members = JSON.parse(r.members);
     } catch {
     }
-    tcByMonster[r.anchor_monster_id].teams.push({ id: r.id, members, date: r.created_at?.slice(0, 10) ?? "" });
+    tcByMonster[r.anchor_monster_id].teams.push({ id: r.id, members, mode: r.mode || "rta", date: r.created_at?.slice(0, 10) ?? "" });
   }
   const tcGroups = Object.values(tcByMonster);
   const html = `<!DOCTYPE html>
@@ -309,6 +310,9 @@ async function handleDashboard(request, env) {
   .btn:hover{opacity:.85}
   .btn-purple{background:linear-gradient(135deg,#5a4ee8,#8b5cf6);color:#fff}
   .btn-green{background:linear-gradient(135deg,#2a5a3a,#3a8a5a);color:#fff}
+  .tc-mode-tab{flex:1;background:#0f1117;border:1px solid #2e3250;color:#8b90b0;border-radius:8px;padding:.5rem .6rem;font-size:.82rem;font-weight:600;cursor:pointer}
+  .tc-mode-tab.active{background:linear-gradient(135deg,#1a3a2a,#2a5a3a);border-color:#3a8a5a;color:#e8eaf6}
+  .tc-mode-badge{display:inline-block;background:#1a3a2a;border:1px solid #3a8a5a;color:#80d8a0;border-radius:5px;padding:.1rem .45rem;font-size:.68rem;font-weight:700;margin-right:.4rem}
   .btn-danger{background:#3a1a1a;border:1px solid #7a2a2a;color:#e08080}
   .btn-sm{padding:.22rem .6rem;font-size:.78rem;border-radius:6px}
   h2{font-size:1rem;text-transform:uppercase;letter-spacing:.1em;color:#8b90b0;margin-bottom:.75rem;margin-top:2rem;border-bottom:1px solid #2e3250;padding-bottom:.4rem}
@@ -471,6 +475,11 @@ async function handleDashboard(request, env) {
   <div class="overlay" id="createTeamOverlay" onclick="if(event.target===this)closeCreateTeam()">
     <div class="modal" style="max-width:520px">
       <h3 id="createTeamTitle">Create Team</h3>
+      <div id="teamModeTabs" style="display:flex;gap:.35rem;margin-top:.9rem">
+        <button type="button" class="tc-mode-tab" data-mode="rta" onclick="setTeamMode('rta')">RTA</button>
+        <button type="button" class="tc-mode-tab" data-mode="defense" onclick="setTeamMode('defense')">Defense Arena</button>
+        <button type="button" class="tc-mode-tab" data-mode="attack" onclick="setTeamMode('attack')">Attack Arena</button>
+      </div>
       <div style="margin:.9rem 0 .3rem;font-size:.75rem;text-transform:uppercase;letter-spacing:.07em;color:#8b90b0">Team members</div>
       <div id="teamMembersBox" style="display:flex;flex-wrap:wrap;gap:.35rem;min-height:46px;background:#0f1117;border:1px solid #2e3250;border-radius:8px;padding:.5rem;align-items:center"></div>
       <div id="teamMemberCount" style="color:#8b90b0;font-size:.76rem;margin:.3rem 0 .7rem">0 / 5 members</div>
@@ -1331,7 +1340,7 @@ function renderTCList(group) {
         </div>
         <button class="btn btn-sm btn-danger" onclick="deleteTeam(\${t.id},\${group.monster_id},this)">Delete</button>
       </div>
-      <div style="color:#8b90b0;font-size:.7rem;margin-top:.4rem">\${t.date}</div>
+      <div style="color:#8b90b0;font-size:.7rem;margin-top:.4rem"><span class="tc-mode-badge">\${TEAM_MODE_LABEL[t.mode] || "RTA"}</span>\${t.date}</div>
     </div>\`).join("") || '<div style="color:#8b90b0;text-align:center;padding:1.5rem">No teams yet</div>';
 }
 function closeTCView() {
@@ -1354,6 +1363,15 @@ async function deleteTeam(id, monsterId, btn) {
 let teamMembers = [];
 let teamAnchorId = null;
 let teamSearchTimer;
+let teamMode = "rta";
+const TEAM_MODE_MAX = { rta: 5, defense: 3, attack: 3 };
+const TEAM_MODE_LABEL = { rta: "RTA", defense: "Defense Arena", attack: "Attack Arena" };
+function setTeamMode(mode) {
+  teamMode = mode;
+  document.querySelectorAll("#teamModeTabs .tc-mode-tab").forEach(b => b.classList.toggle("active", b.dataset.mode === mode));
+  if (teamMembers.length > TEAM_MODE_MAX[mode]) teamMembers = teamMembers.slice(0, TEAM_MODE_MAX[mode]);
+  renderTeamMembers();
+}
 
 function openCreateTeam(anchorId, anchorName, anchorImg) {
   teamMembers = anchorId ? [{ id: anchorId, name: anchorName, image_filename: anchorImg || "", element: "" }] : [];
@@ -1362,7 +1380,7 @@ function openCreateTeam(anchorId, anchorName, anchorImg) {
   document.getElementById("teamSearch").value = "";
   document.getElementById("teamSearchResults").style.display = "none";
   document.getElementById("createTeamMsg").textContent = "";
-  renderTeamMembers();
+  setTeamMode("rta");
   document.getElementById("createTeamOverlay").classList.add("open");
   setTimeout(() => document.getElementById("teamSearch").focus(), 50);
 }
@@ -1377,7 +1395,7 @@ function renderTeamMembers() {
       <span>\${m.name}</span>
       \${i === 0 && teamAnchorId ? '<span style="color:#7c6cf8;font-size:.68rem;margin-left:.1rem">(anchor)</span>' : \`<button onclick="removeMember(\${i})" style="background:none;border:none;color:#e08080;cursor:pointer;padding:0 .1rem;font-size:.85rem;line-height:1;margin-left:.1rem">\u2715</button>\`}
     </div>\`).join("") || '<span style="color:#8b90b0;font-size:.83rem">No members \u2014 search to add</span>';
-  document.getElementById("teamMemberCount").textContent = \`\${teamMembers.length} / 5 members\`;
+  document.getElementById("teamMemberCount").textContent = \`\${teamMembers.length} / \${TEAM_MODE_MAX[teamMode]} members\`;
   document.getElementById("saveTeamBtn").disabled = teamMembers.length < 2;
 }
 function removeMember(index) {
@@ -1387,7 +1405,7 @@ function removeMember(index) {
 function searchForTeam(q) {
   clearTimeout(teamSearchTimer);
   const res = document.getElementById("teamSearchResults");
-  if (!q.trim() || teamMembers.length >= 5) { res.style.display = "none"; return; }
+  if (!q.trim() || teamMembers.length >= TEAM_MODE_MAX[teamMode]) { res.style.display = "none"; return; }
   teamSearchTimer = setTimeout(async () => {
     const data = await fetch("/api/monsters?q=" + encodeURIComponent(q) + "&limit=8").then(r => r.json());
     res.innerHTML = data.results.map(m =>
@@ -1401,7 +1419,7 @@ function searchForTeam(q) {
   }, 250);
 }
 function addTeamMember(id, name, img, element) {
-  if (teamMembers.length >= 5 || teamMembers.some(m => m.id === id)) return;
+  if (teamMembers.length >= TEAM_MODE_MAX[teamMode] || teamMembers.some(m => m.id === id)) return;
   if (!teamAnchorId) teamAnchorId = id;
   teamMembers.push({ id, name, image_filename: img, element });
   document.getElementById("teamSearch").value = "";
@@ -1418,7 +1436,7 @@ async function saveTeam() {
   const res = await fetch("/api/admin/teams?t=" + encodeURIComponent(T), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ anchor_monster_id: anchorId, anchor_name: anchorName, members: teamMembers })
+    body: JSON.stringify({ anchor_monster_id: anchorId, anchor_name: anchorName, members: teamMembers, mode: teamMode })
   });
   btn.disabled = false; btn.textContent = "Save Team";
   if (res.ok) {
@@ -1601,10 +1619,12 @@ async function handleAPI(url, request, env) {
     const anchorId = parseInt(body.anchor_monster_id);
     const anchorName = body.anchor_name || "";
     const members = body.members || [];
+    const mode = TEAM_MODE_MAX[body.mode] ? body.mode : "rta";
     if (!anchorId || members.length < 2) return json({ error: "Missing data" }, 400);
+    if (members.length > TEAM_MODE_MAX[mode]) return json({ error: `Max ${TEAM_MODE_MAX[mode]} members for this mode` }, 400);
     await env.DB.prepare(
-      "INSERT INTO teams (anchor_monster_id, anchor_name, members) VALUES (?, ?, ?)"
-    ).bind(anchorId, anchorName, JSON.stringify(members)).run();
+      "INSERT INTO teams (anchor_monster_id, anchor_name, members, mode) VALUES (?, ?, ?, ?)"
+    ).bind(anchorId, anchorName, JSON.stringify(members), mode).run();
     return json({ ok: true });
   }
   if (path === "/submit-rune-build" && request.method === "POST") {
@@ -1681,10 +1701,11 @@ async function getRuneBuilds(monsterId, env) {
   }
 }
 __name(getRuneBuilds, "getRuneBuilds");
+const TEAM_MODE_MAX = { rta: 5, defense: 3, attack: 3 };
 async function getTeamComp(monsterId, env) {
   try {
     const rows = await env.DB.prepare(
-      `SELECT id, members, created_at FROM teams WHERE anchor_monster_id = ? ORDER BY created_at DESC`
+      `SELECT id, members, mode, created_at FROM teams WHERE anchor_monster_id = ? ORDER BY created_at DESC`
     ).bind(parseInt(monsterId)).all();
     return json({
       results: rows.results.map((r) => {
@@ -1693,7 +1714,7 @@ async function getTeamComp(monsterId, env) {
           members = JSON.parse(r.members);
         } catch {
         }
-        return { id: r.id, members, created_at: r.created_at };
+        return { id: r.id, members, mode: r.mode || "rta", created_at: r.created_at };
       })
     });
   } catch {
@@ -1785,10 +1806,12 @@ async function handleAdminAPI(path, request, env) {
     const anchorId = parseInt(body.anchor_monster_id);
     const anchorName = body.anchor_name || "";
     const members = JSON.stringify(body.members || []);
+    const mode = TEAM_MODE_MAX[body.mode] ? body.mode : "rta";
     if (!anchorId || !body.members?.length) return json({ error: "Missing data" }, 400);
+    if (body.members.length > TEAM_MODE_MAX[mode]) return json({ error: `Max ${TEAM_MODE_MAX[mode]} members for this mode` }, 400);
     await env.DB.prepare(
-      "INSERT INTO teams (anchor_monster_id, anchor_name, members) VALUES (?, ?, ?)"
-    ).bind(anchorId, anchorName, members).run();
+      "INSERT INTO teams (anchor_monster_id, anchor_name, members, mode) VALUES (?, ?, ?, ?)"
+    ).bind(anchorId, anchorName, members, mode).run();
     return json({ ok: true });
   }
   if (path === "teams/all" && request.method === "DELETE") {

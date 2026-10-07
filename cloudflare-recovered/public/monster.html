@@ -58,6 +58,8 @@
       <h3 id="mnAddRuneTitle" style="font-size:1rem;color:#e8eaf6">Add Rune Build</h3>
       <button onclick="mnCloseAddRune()" style="background:none;border:none;color:#8b90b0;font-size:1.2rem;cursor:pointer;line-height:1">✕</button>
     </div>
+    <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:#8b90b0;margin-bottom:.3rem">Build name</div>
+    <input type="text" id="mnArName" maxlength="120" placeholder="e.g. Violent / Will speed tank (optional)" autocomplete="off" style="width:100%;background:#0f1117;border:1px solid #2e3250;border-radius:8px;padding:.55rem .75rem;color:#e8eaf6;font-size:.88rem;box-sizing:border-box;margin-bottom:.9rem">
     <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:#8b90b0;margin-bottom:.7rem">Click each slot to fill in stats</div>
     <div style="display:flex;justify-content:center">
       <div id="mnArStarContainer" style="position:relative;width:260px;height:260px"></div>
@@ -105,6 +107,11 @@
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem">
       <h3 id="mnAddTcTitle" style="font-size:1rem;color:#e8eaf6">Add Team Composition</h3>
       <button onclick="mnCloseAddTc()" style="background:none;border:none;color:#8b90b0;font-size:1.2rem;cursor:pointer;line-height:1">✕</button>
+    </div>
+    <div id="mnTcModeTabs" style="display:flex;gap:.35rem;margin-bottom:.9rem">
+      <button type="button" data-mode="rta" onclick="mnTcSetMode('rta')" class="tc-mode-tab">RTA</button>
+      <button type="button" data-mode="defense" onclick="mnTcSetMode('defense')" class="tc-mode-tab">Defense Arena</button>
+      <button type="button" data-mode="attack" onclick="mnTcSetMode('attack')" class="tc-mode-tab">Attack Arena</button>
     </div>
     <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:#8b90b0;margin-bottom:.4rem">Team members</div>
     <div id="mnTcMembersBox" style="display:flex;flex-wrap:wrap;gap:.35rem;min-height:46px;background:#0f1117;border:1px solid #2e3250;border-radius:8px;padding:.5rem;align-items:center;margin-bottom:.3rem"></div>

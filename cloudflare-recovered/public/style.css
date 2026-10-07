@@ -672,3 +672,13 @@ footer { text-align: center; padding: 2rem 1rem; border-top: 1px solid var(--bor
   .detail-header { flex-direction: column; align-items: center; text-align: center; }
   .detail-badges { justify-content: center; }
 }
+
+/* ── Team comp mode tabs (RTA / Defense Arena / Attack Arena) ── */
+.tc-mode-tab {
+  flex: 1; background: #0f1117; border: 1px solid #2e3250; color: #8b90b0;
+  border-radius: 8px; padding: .5rem .6rem; font-size: .82rem; font-weight: 600;
+  cursor: pointer; transition: background .15s, color .15s, border-color .15s;
+}
+.tc-mode-tab:hover { color: #c8cadf; }
+.tc-mode-tab.active { background: linear-gradient(135deg,#1a3a2a,#2a5a3a); border-color: #3a8a5a; color: #e8eaf6; }
+.tc-mode-tab .tc-mode-count { opacity: .7; font-weight: 500; margin-left: .25rem; }
