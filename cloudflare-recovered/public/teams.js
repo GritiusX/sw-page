@@ -98,6 +98,9 @@ async function loadTeams(append = false) {
   document.getElementById("teams-more").style.display = teamsState.offset < data.total ? "" : "none";
 }
 
+// Called by team-add.js after a successful submit: refresh the list.
+window.onTeamAdded = () => loadTeams();
+
 document.addEventListener("DOMContentLoaded", async () => {
   await readTeamsHash();
 

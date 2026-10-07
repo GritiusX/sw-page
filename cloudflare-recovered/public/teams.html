@@ -18,7 +18,10 @@
 </header>
 
 <main class="teams-page">
-  <div class="section-title" style="margin-top:0">All Team Compositions</div>
+  <div class="section-title" style="margin-top:0;display:flex;align-items:center;justify-content:space-between;gap:.6rem">
+    <span>All Team Compositions</span>
+    <button type="button" onclick="mnOpenAddTc(teamsState.mode || 'rta')" style="background:linear-gradient(135deg,#1a3a2a,#2a5a3a);border:1px solid #3a8a5a;color:#80d8a0;border-radius:8px;padding:.4rem .9rem;font-size:.8rem;font-weight:600;cursor:pointer;text-transform:none;letter-spacing:0;margin-bottom:.3rem">➕ Add Team</button>
+  </div>
   <div class="teams-filter">
     <div id="teams-chips" class="teams-chips"></div>
     <div style="position:relative">
@@ -42,6 +45,8 @@
   <a href="/dashboard" class="footer-dashboard-btn">📊 Dashboard</a>
 </footer>
 
+<script src="/team-add.js"></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script src="/team-card.js"></script>
 <script src="/teams.js"></script>
 </body>

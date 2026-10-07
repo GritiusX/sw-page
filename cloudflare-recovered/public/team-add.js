@@ -1,7 +1,7 @@
 /* Shared "Add Team Composition" modal (RTA / Defense Arena / Attack Arena).
-   Used by /monsters/:id and /team-comp/:id. Expects window._pageMonster to be set
-   before mnOpenAddTc(mode) is called; optional window.onTeamAdded(mode) runs after a
-   successful submit. Load before the Turnstile script so the captcha widget renders. */
+   Used by /monsters/:id, /team-comp/:id and /teams. If window._pageMonster is set it is
+   the fixed anchor; otherwise (/teams) the first monster added becomes the anchor.
+   Optional window.onTeamAdded(mode) runs after a successful submit. Load before the Turnstile script so the captcha widget renders. */
 document.body.insertAdjacentHTML('beforeend', `
 <!-- Add Team Composition modal -->
 <div id="mnAddTcOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:200;align-items:center;justify-content:center" onclick="if(event.target===this)mnCloseAddTc()">
@@ -48,9 +48,9 @@ function mnTcSetMode(mode) {
 }
 
 function mnOpenAddTc(mode) {
-  const m=window._pageMonster; if(!m) return;
-  _mnTcMembers=[{id:m.id,name:m.name,image_filename:m.image_filename||'',element:m.element||''}];
-  document.getElementById('mnAddTcTitle').textContent=`Add Team — ${m.name}`;
+  const m=window._pageMonster;
+  _mnTcMembers=m?[{id:m.id,name:m.name,image_filename:m.image_filename||'',element:m.element||''}]:[];
+  document.getElementById('mnAddTcTitle').textContent=m?`Add Team — ${m.name}`:'Add Team Composition';
   document.getElementById('mnTcSearch').value='';
   document.getElementById('mnTcSearchResults').style.display='none';
   document.getElementById('mnAddTcMsg').textContent='';
@@ -67,13 +67,14 @@ function mnCloseAddTc() {
 }
 function _mnRenderTcMembers() {
   const box=document.getElementById('mnTcMembersBox');
-  const m=window._pageMonster;
+  const fixedAnchor=!!window._pageMonster;
   box.innerHTML=_mnTcMembers.map((tm,i)=>`
     <div style="display:inline-flex;align-items:center;gap:.3rem;background:#1a1d27;border:1px solid #2e3250;border-radius:6px;padding:.22rem .45rem;font-size:.79rem">
       <img src="/images/monsters/${tm.image_filename}" style="width:22px;height:22px;object-fit:contain;border-radius:3px;background:#111" onerror="this.style.display='none'">
       <span>${tm.name}</span>
-      ${i===0?'<span style="color:#7c6cf8;font-size:.68rem;margin-left:.1rem">(anchor)</span>':`<button onclick="_mnRemoveTcMember(${i})" style="background:none;border:none;color:#e08080;cursor:pointer;padding:0 .1rem;font-size:.85rem;line-height:1;margin-left:.1rem">✕</button>`}
-    </div>`).join('')||'<span style="color:#8b90b0;font-size:.83rem">No members</span>';
+      ${i===0?'<span style="color:#7c6cf8;font-size:.68rem;margin-left:.1rem">(anchor)</span>':''}
+      ${i===0&&fixedAnchor?'':`<button onclick="_mnRemoveTcMember(${i})" style="background:none;border:none;color:#e08080;cursor:pointer;padding:0 .1rem;font-size:.85rem;line-height:1;margin-left:.1rem">✕</button>`}
+    </div>`).join('')||'<span style="color:#8b90b0;font-size:.83rem">No members — the first monster you add is the anchor</span>';
   document.getElementById('mnTcMemberCount').textContent=`${_mnTcMembers.length} / ${TC_MODE_MAX[_mnTcMode]} members`;
 }
 function _mnRemoveTcMember(i) { _mnTcMembers.splice(i,1); _mnRenderTcMembers(); }
@@ -99,12 +100,12 @@ function _mnAddTcMember(id,name,img,element) {
   _mnRenderTcMembers();
 }
 async function mnSubmitAddTc() {
-  const m=window._pageMonster; if(!m) return;
+  const m=_mnTcMembers[0];
   const token=document.querySelector('#mnAddTcCaptcha [name="cf-turnstile-response"]')?.value||'';
   const btn=document.getElementById('mnAddTcSubmitBtn');
   const msg=document.getElementById('mnAddTcMsg');
   if(!token){msg.style.color='#e08080';msg.textContent='Please complete the CAPTCHA first.';return;}
-  if(_mnTcMembers.length<2){msg.style.color='#e08080';msg.textContent='Add at least one more member.';return;}
+  if(_mnTcMembers.length<2){msg.style.color='#e08080';msg.textContent='Add at least two members.';return;}
   btn.disabled=true; btn.textContent='Submitting…';
   const res=await fetch('/api/submit-team-comp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({anchor_monster_id:m.id,anchor_name:m.name,members:_mnTcMembers,mode:_mnTcMode,token})});
   if(res.ok){msg.style.color='#80c880';msg.textContent='Team submitted! Thank you 🙏';btn.textContent='Submitted!';setTimeout(mnCloseAddTc,2200);if(typeof window.onTeamAdded==='function')window.onTeamAdded(_mnTcMode);}
